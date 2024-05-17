@@ -3,8 +3,8 @@ import { GraphQLSchema, graphql } from "graphql";
 import { buildSchema } from "type-graphql";
 import { DataSource } from "typeorm";
 import { dataSourceOptions } from "../src/datasource";
-import { Difficulty, QuestCreateInput } from "../src/entities/Quest";
-import { QuestResolver } from "../src/resolvers/Quests";
+import { UserCreateInput } from "../src/entities/User";
+import { UserResolver } from "../src/resolvers/Users";
 
 let dataSource: DataSource;
 let schema: GraphQLSchema;
@@ -24,70 +24,57 @@ beforeAll(async () => {
   await dataSource.initialize();
 
   schema = await buildSchema({
-    resolvers: [QuestResolver],
+    resolvers: [UserResolver],
   });
 });
 
 describe("create a new quest", () => {
-  let createdQuestId: number;
+  let createdUserId: number;
 
   it("should create a new quest", async () => {
-    const data: QuestCreateInput = {
-      title: "Test Quest",
-      description: "Description d'une quête test",
-      startDate: new Date(),
-      duration: 10,
-      difficulty: Difficulty.EASY,
-      missions: [],
+    const data: UserCreateInput = {
+      email: "user@user.com",
+      password: "12345678",
     };
 
     const response = await graphql({
       schema,
       source: `
-          mutation CreateQuest($data: QuestCreateInput!) {
-            createQuest(data: $data) {
+          mutation SignUp($data: UserCreateInput!) {
+            signUp(data: $data) {
               id
-              title
-              startDate
-              duration
-              difficulty
+              email
             }
           }
         `,
       variableValues: { data },
     });
 
-    const createQuest: any = response.data?.createQuest;
-    createdQuestId = createQuest.id;
+    const createUser: any = response.data?.createUser;
+    createdUserId = createUser.id;
 
-    expect(createQuest).toBeDefined();
-    expect(createQuest).toHaveProperty("id");
-    expect(createQuest).toHaveProperty("title", data.title);
-    expect(createQuest).toHaveProperty(
-      "startDate",
-      data.startDate.toISOString()
-    );
-    expect(createQuest).toHaveProperty("duration", data.duration);
-    expect(createQuest).toHaveProperty("difficulty", data.difficulty);
+    expect(createUser).toBeDefined();
+    expect(createUser).toHaveProperty("id");
+    expect(createUser).toHaveProperty("email", data.email);
   });
 
   it("should find the created quest by its ID", async () => {
     const response = await graphql({
       schema,
       source: `
-        query getQuestById($Id: ID!) {
-          getQuestById(id: $Id) {
+          query GetUserById($userId: ID!) {
+            getUserById(id: $userId) {
               id
-              title
+              email
             }
           }
         `,
-      variableValues: { Id: createdQuestId },
+      variableValues: { userId: createdUserId },
     });
 
-    const foundQuest = response.data?.getQuestById;
+    const foundUser = response.data?.getUserById;
 
-    expect(foundQuest).toBeDefined();
-    expect(foundQuest).toHaveProperty("id", createdQuestId);
+    expect(foundUser).toBeDefined();
+    expect(foundUser).toHaveProperty("id", createdUserId);
   });
 });
