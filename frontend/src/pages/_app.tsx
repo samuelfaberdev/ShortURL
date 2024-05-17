@@ -9,7 +9,7 @@ import type { AppProps } from "next/app";
 import dynamic from "next/dynamic";
 
 const link = createHttpLink({
-  uri: process.env.API_URL,
+  uri: "http://localhost:5050/",
   credentials: "include",
 });
 
