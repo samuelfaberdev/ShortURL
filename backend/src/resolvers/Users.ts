@@ -112,7 +112,7 @@ export class UserResolver {
   }
 
   @Mutation(() => User, { nullable: true })
-  async signin(
+  async signIn(
     @Ctx() context: { req: any; res: any },
     @Arg("email") email: string,
     @Arg("password") password: string
