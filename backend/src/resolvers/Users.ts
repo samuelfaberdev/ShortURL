@@ -135,8 +135,6 @@ export class UserResolver {
           `${process.env.JWT_SECRET}`
         );
 
-        console.log(token);
-
         const cookies = new Cookies(context.req, context.res);
         cookies.set("token", token, {
           httpOnly: true,
@@ -156,7 +154,7 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  async signout(@Ctx() context: ContextType): Promise<Boolean> {
+  async signOut(@Ctx() context: ContextType): Promise<Boolean> {
     const cookies = new Cookies(context.req, context.res);
     cookies.set("token", "", {
       httpOnly: true,
