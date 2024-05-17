@@ -55,6 +55,11 @@ export class UrlResolver {
       }
       return newAlias;
     }
+
+    if (!data.url.startsWith("http")) {
+      data.url = "https://" + data.url;
+    }
+
     const newAlias = generateAlias();
     const shortUrl = new Url();
     shortUrl.alias = await newAlias;
