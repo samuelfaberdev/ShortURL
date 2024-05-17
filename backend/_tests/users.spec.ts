@@ -1,13 +1,37 @@
 import { beforeAll, describe, expect, it } from "@jest/globals";
 import { GraphQLSchema, graphql } from "graphql";
-import { buildSchema } from "type-graphql";
+import jwt from "jsonwebtoken";
+import { AuthChecker, buildSchema } from "type-graphql";
 import { DataSource } from "typeorm";
 import { dataSourceOptions } from "../src/datasource";
 import { UserCreateInput } from "../src/entities/User";
 import { UserResolver } from "../src/resolvers/Users";
 
+// Signer un jeton JWT avec l'ID de l'utilisateur
+function generateAuthToken(userId: string): string {
+  return jwt.sign({ userId }, "secret");
+}
+
+// Fonction pour vérifier si l'utilisateur est authentifié
+const customAuthChecker: AuthChecker<{ authToken: string }> = ({ context }) => {
+  const { authToken } = context;
+
+  if (!authToken) {
+    return false;
+  }
+
+  try {
+    const decodedToken = jwt.verify(authToken, "secret");
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
 let dataSource: DataSource;
 let schema: GraphQLSchema;
+let authToken: string;
 
 beforeAll(async () => {
   dataSource = new DataSource({
@@ -25,6 +49,7 @@ beforeAll(async () => {
 
   schema = await buildSchema({
     resolvers: [UserResolver],
+    authChecker: customAuthChecker,
   });
 });
 
