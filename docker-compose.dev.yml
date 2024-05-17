@@ -1,0 +1,32 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - 5050:5050
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/src/:/app/src/
+
+  database:
+    image: postgres
+    restart: always
+    ports:
+      - 5433:5432
+    env_file:
+      - .env
+    volumes:
+      - /var/lib/postgresql/data
+
+  frontend:
+    build: ./frontend
+    ports:
+      - 3000:3000
+    env_file:
+      - ./frontend/.env
+    volumes:
+      - ./frontend/src/:/app/src/
+      - ./frontend/public/:/app/public/
+    environment:
+      - WATCHPACK_POLLING=true
+    command: npm run dev
