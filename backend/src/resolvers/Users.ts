@@ -26,7 +26,7 @@ export class UserResolver {
 
   // Query pour récupérer un utilisateur
   @Query(() => User, { nullable: true })
-  async user(@Arg("id", () => ID) id: number): Promise<User | null> {
+  async getUserById(@Arg("id", () => ID) id: number): Promise<User | null> {
     const user = await User.findOne({
       where: { id: id },
       select: ["id", "email"],

@@ -9,6 +9,7 @@ import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import { customAuthChecker } from "./auth";
 import { dataSource } from "./datasource";
+import { UrlResolver } from "./resolvers/Urls";
 import { UserResolver } from "./resolvers/Users";
 
 const port = process.env.PORT || 5050;
@@ -19,7 +20,7 @@ async function start() {
   const httpServer = http.createServer(app);
 
   const schema = await buildSchema({
-    resolvers: [UserResolver],
+    resolvers: [UserResolver, UrlResolver],
     authChecker: customAuthChecker,
   });
 

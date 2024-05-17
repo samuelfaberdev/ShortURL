@@ -5,8 +5,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { Url } from "./Url";
 
 @Entity()
 @ObjectType()
@@ -34,6 +36,10 @@ export class User extends BaseEntity {
   @Column("boolean", { default: false })
   @Field()
   isAdmin!: boolean;
+
+  @OneToMany(() => Url, (url) => url.createdBy)
+  @Field(() => [Url])
+  urls!: Url[];
 }
 
 @InputType()
