@@ -27,7 +27,7 @@ export class UrlResolver {
 
   // Mutation création d'une url raccourcie
   @Mutation(() => Url)
-  async createShortUrl(
+  async createRandomAliasUrl(
     @Arg("data", () => UrlCreateInput) data: UrlCreateInput
   ): Promise<Url> {
     // Génération d'un alias aléatoire de 6 caractères alphanumériques
