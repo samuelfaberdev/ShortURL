@@ -75,7 +75,7 @@ describe("create a new quest", () => {
       variableValues: { data },
     });
 
-    const createUser: any = response.data?.createUser;
+    const createUser: any = response.data?.signUp;
     createdUserId = createUser.id;
 
     expect(createUser).toBeDefined();
