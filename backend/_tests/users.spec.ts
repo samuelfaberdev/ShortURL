@@ -83,7 +83,7 @@ describe("create a new quest", () => {
     expect(createUser).toHaveProperty("email", data.email);
   });
 
-  it("should find the created quest by its ID", async () => {
+  it("should find the created user by its ID", async () => {
     const response = await graphql({
       schema,
       source: `
