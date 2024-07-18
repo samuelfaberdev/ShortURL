@@ -63,3 +63,11 @@ export class ChangePasswordInput {
   @Field()
   newPassword: string;
 }
+
+@InputType()
+export class ChangeUserRoleInput {
+  @Field(() => ID)
+  userId!: number;
+  @Field()
+  newRoles!: string;
+}
