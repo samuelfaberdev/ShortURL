@@ -13,6 +13,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { createAlias } from "@/graphql/createAlias";
+import { useMutation } from "@apollo/client";
+import { useEffect, useState } from "react";
 
 const formSchema = z.object({
   url: z.string().min(5, {
@@ -21,6 +24,8 @@ const formSchema = z.object({
 });
 
 export function ShortURLForm() {
+  const [doCreateAlias, { data, error }] = useMutation(createAlias);
+  const [shortUrl, setShortUrl] = useState("");
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -29,37 +34,71 @@ export function ShortURLForm() {
     },
   });
 
+  useEffect(() => {
+    data
+      ? setShortUrl(`http://localhost:3000/${data.createRandomAliasUrl.alias}`)
+      : "";
+  }, [data]);
+
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    console.log(values);
+    try {
+      await doCreateAlias({ variables: { data: { url: values.url } } });
+    } catch {
+      console.error(error);
+    }
+  }
+
+  function handleCopy() {
+    navigator.clipboard.writeText(shortUrl);
+    console.info(shortUrl);
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 w-[480px]"
-      >
-        <FormField
-          control={form.control}
-          name="url"
-          render={({ field }) => (
+    <>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8 w-[480px]"
+        >
+          <FormField
+            control={form.control}
+            name="url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>URL</FormLabel>
+                <FormControl>
+                  <Input placeholder="URL à réduire" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Ceci est l&apos;url que vous souhaitez réduire.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit">Envoyer</Button>
+          {data ? (
             <FormItem>
-              <FormLabel>URL</FormLabel>
-              <FormControl>
-                <Input placeholder="URL à réduire" {...field} />
-              </FormControl>
-              <FormDescription>
-                Ceci est l&apos;url que vous souhaitez réduire.
-              </FormDescription>
-              <FormMessage />
+              <FormLabel>URL réduite</FormLabel>
+              <Input
+                id="url"
+                type="url"
+                placeholder="URL réduite"
+                readOnly
+                value={shortUrl}
+              />
+              <Button type="button" onClick={handleCopy}>
+                Copier
+              </Button>
             </FormItem>
+          ) : (
+            ""
           )}
-        />
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </>
   );
 }
