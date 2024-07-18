@@ -33,9 +33,9 @@ export class User extends BaseEntity {
   @Field()
   createdAt!: Date;
 
-  @Column("boolean", { default: false })
+  @Column({ default: "user" })
   @Field()
-  isAdmin!: boolean;
+  roles!: string;
 
   @OneToMany(() => Url, (url) => url.createdBy)
   @Field(() => [Url])

@@ -18,6 +18,7 @@ const argon2 = require("argon2");
 @Resolver(User)
 export class UserResolver {
   // Query pour récupérer tous les utilisateurs
+  @Authorized("admin")
   @Query(() => [User])
   async getUsers(): Promise<User[]> {
     const users = await User.find();
@@ -25,6 +26,7 @@ export class UserResolver {
   }
 
   // Query pour récupérer un utilisateur
+  @Authorized("user")
   @Query(() => User, { nullable: true })
   async getUserById(@Arg("id", () => ID) id: number): Promise<User | null> {
     const user = await User.findOne({

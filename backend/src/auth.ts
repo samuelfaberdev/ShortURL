@@ -11,9 +11,10 @@ export type ContextType = {
 
 // stock jwt token into cookies
 
-export const customAuthChecker: AuthChecker<ContextType> = async ({
-  context,
-}) => {
+export const customAuthChecker: AuthChecker<ContextType> = async (
+  { context },
+  roles
+) => {
   const cookies = new Cookies(context.req, context.res);
   const token = cookies.get("token");
 
@@ -29,7 +30,14 @@ export const customAuthChecker: AuthChecker<ContextType> = async ({
 
       if (user !== null) {
         context.user = user;
-        return true;
+        if (roles.length === 0) {
+          return true;
+        } else if (roles.includes(user.roles)) {
+          return true;
+        } else {
+          console.error("You don't have permission to perform this action !");
+          return false;
+        }
       } else {
         console.error("User not found!");
         return false;
