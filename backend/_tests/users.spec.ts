@@ -98,7 +98,7 @@ describe("create a new user", () => {
 
     const foundUser = response.data?.mySelf;
 
-    console.info(foundUser);
+    console.info(response.data);
 
     expect(foundUser).toBeDefined();
     expect(foundUser).toHaveProperty("id");
