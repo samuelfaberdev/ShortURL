@@ -122,7 +122,7 @@ describe("create a new user", () => {
     const foundUser = response.data?.mySelf;
 
     expect(foundUser).toBeDefined();
-    expect(foundUser).toHaveProperty("id", fakeUser.id);
+    expect(foundUser).toHaveProperty("id", fakeUser.id.toString());
     expect(foundUser).toHaveProperty("roles", "user");
   });
 });
