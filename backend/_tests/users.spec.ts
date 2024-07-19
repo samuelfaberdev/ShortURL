@@ -83,7 +83,7 @@ describe("create a new user", () => {
     expect(createUser).toHaveProperty("email", data.email);
   });
 
-  it("should find the created user by its ID", async () => {
+  it("should find the created user", async () => {
     const response = await graphql({
       schema,
       source: `
@@ -97,6 +97,8 @@ describe("create a new user", () => {
     });
 
     const foundUser = response.data?.mySelf;
+
+    console.info(foundUser);
 
     expect(foundUser).toBeDefined();
     expect(foundUser).toHaveProperty("id");
