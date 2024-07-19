@@ -87,19 +87,19 @@ describe("create a new user", () => {
     const response = await graphql({
       schema,
       source: `
-          query GetUserById($userId: ID!) {
-            getUserById(id: $userId) {
+          query MySelf {
+            mySelf {
               id
-              email
+              roles
             }
           }
         `,
-      variableValues: { userId: createdUserId },
     });
 
-    const foundUser = response.data?.getUserById;
+    const foundUser = response.data?.mySelf;
 
     expect(foundUser).toBeDefined();
-    expect(foundUser).toHaveProperty("id", createdUserId);
+    expect(foundUser).toHaveProperty("id");
+    expect(foundUser).toHaveProperty("roles", "user");
   });
 });
