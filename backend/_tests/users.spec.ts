@@ -102,7 +102,7 @@ describe("create a new user", () => {
     expect(createUser).toHaveProperty("email", data.email);
   });
 
-  it("should find the created user", async () => {
+  it("should find the created user with 'user' roles", async () => {
     const response = await graphql({
       schema,
       source: `
