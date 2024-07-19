@@ -81,19 +81,21 @@ export function ShortURLForm() {
           />
           <Button type="submit">Envoyer</Button>
           {data ? (
-            <FormItem>
-              <FormLabel>URL réduite</FormLabel>
-              <Input
-                id="url"
-                type="url"
-                placeholder="URL réduite"
-                readOnly
-                value={shortUrl}
-              />
+            <>
+              <FormItem>
+                <FormLabel>URL réduite</FormLabel>
+                <Input
+                  id="url"
+                  type="url"
+                  placeholder="URL réduite"
+                  readOnly
+                  value={shortUrl}
+                />
+              </FormItem>
               <Button type="button" onClick={handleCopy}>
                 Copier
               </Button>
-            </FormItem>
+            </>
           ) : (
             ""
           )}
