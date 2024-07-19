@@ -53,10 +53,10 @@ beforeAll(async () => {
   });
 });
 
-describe("create a new quest", () => {
+describe("create a new user", () => {
   let createdUserId: number;
 
-  it("should create a new quest", async () => {
+  it("should create a new user", async () => {
     const data: UserCreateInput = {
       email: "user@user.com",
       password: "12345678",
