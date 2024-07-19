@@ -1,10 +1,10 @@
 import { beforeAll, describe, expect, it } from "@jest/globals";
 import { GraphQLSchema, graphql } from "graphql";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { AuthChecker, buildSchema } from "type-graphql";
 import { DataSource } from "typeorm";
 import { dataSourceOptions } from "../src/datasource";
-import { UserCreateInput } from "../src/entities/User";
+import { User, UserCreateInput } from "../src/entities/User";
 import { UserResolver } from "../src/resolvers/Users";
 
 // Signer un jeton JWT avec l'ID de l'utilisateur
@@ -13,7 +13,10 @@ function generateAuthToken(userId: string): string {
 }
 
 // Fonction pour vérifier si l'utilisateur est authentifié
-const customAuthChecker: AuthChecker<{ authToken: string }> = ({ context }) => {
+const customAuthChecker: AuthChecker<{
+  user: any;
+  authToken: string;
+}> = ({ context }) => {
   const { authToken } = context;
 
   if (!authToken) {
@@ -21,8 +24,12 @@ const customAuthChecker: AuthChecker<{ authToken: string }> = ({ context }) => {
   }
 
   try {
-    const decodedToken = jwt.verify(authToken, "secret");
-
+    const decodedToken = jwt.verify(authToken, "secret") as JwtPayload;
+    context.user = {
+      id: parseInt(decodedToken.userId, 10),
+      email: "testuser@example.com",
+      roles: "user",
+    } as any;
     return true;
   } catch (error) {
     return false;
@@ -32,6 +39,7 @@ const customAuthChecker: AuthChecker<{ authToken: string }> = ({ context }) => {
 let dataSource: DataSource;
 let schema: GraphQLSchema;
 let authToken: string;
+let fakeUser: User;
 
 beforeAll(async () => {
   dataSource = new DataSource({
@@ -42,6 +50,7 @@ beforeAll(async () => {
     password: "pgpassword",
     database: "postgres",
     dropSchema: true,
+    synchronize: true,
     logging: false,
   });
 
@@ -51,6 +60,16 @@ beforeAll(async () => {
     resolvers: [UserResolver],
     authChecker: customAuthChecker,
   });
+
+  // Créer un utilisateur fictif dans la base de données
+  fakeUser = await User.create({
+    email: "testuser@example.com",
+    hashedPassword: "hashedPassword",
+    createdAt: new Date(),
+    roles: "user",
+  }).save();
+
+  authToken = generateAuthToken(fakeUser.id.toString());
 });
 
 describe("create a new user", () => {
@@ -94,14 +113,16 @@ describe("create a new user", () => {
             }
           }
         `,
+      contextValue: {
+        authToken,
+        user: fakeUser,
+      },
     });
 
     const foundUser = response.data?.mySelf;
 
-    console.info(response.data);
-
     expect(foundUser).toBeDefined();
-    expect(foundUser).toHaveProperty("id");
+    expect(foundUser).toHaveProperty("id", fakeUser.id);
     expect(foundUser).toHaveProperty("roles", "user");
   });
 });
