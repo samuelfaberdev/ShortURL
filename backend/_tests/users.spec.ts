@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from "@jest/globals";
+import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import { GraphQLSchema, graphql } from "graphql";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { AuthChecker, buildSchema } from "type-graphql";
@@ -126,3 +126,5 @@ describe("create a new user", () => {
     expect(foundUser).toHaveProperty("roles", "user");
   });
 });
+
+afterAll(() => dataSource.destroy());
