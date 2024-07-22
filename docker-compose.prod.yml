@@ -1,8 +1,6 @@
 services:
   backend:
     image: samuelfaberdev/shorturl-back
-    expose:
-      - 5050
     environment:
       - NODE_ENV=production
     env_file:
@@ -11,8 +9,6 @@ services:
       database:
         condition: service_healthy
         restart: true
-    volumes:
-      - ./backend/src/:/app/src/
 
   database:
     image: postgres
