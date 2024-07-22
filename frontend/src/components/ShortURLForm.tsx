@@ -69,7 +69,7 @@ export function ShortURLForm() {
   }
 
   return (
-    <Card className="w-[480px]">
+    <Card className="w-full max-w-[480px]">
       <CardHeader>
         <CardTitle>Raccourcir l&apos;URL</CardTitle>
         <CardDescription>
