@@ -6,16 +6,24 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { createAlias } from "@/graphql/createAlias";
 import { useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Label } from "./ui/label";
+import { useToast } from "./ui/use-toast";
 
 const formSchema = z.object({
   url: z.string().min(5, {
@@ -26,6 +34,8 @@ const formSchema = z.object({
 export function ShortURLForm() {
   const [doCreateAlias, { data, error }] = useMutation(createAlias);
   const [shortUrl, setShortUrl] = useState("");
+  const { toast } = useToast();
+
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,54 +63,60 @@ export function ShortURLForm() {
 
   function handleCopy() {
     navigator.clipboard.writeText(shortUrl);
+    toast({
+      title: "ShortURL copiée !",
+    });
     console.info(shortUrl);
   }
 
   return (
-    <>
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-[480px]"
-        >
-          <FormField
-            control={form.control}
-            name="url"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>URL</FormLabel>
-                <FormControl>
-                  <Input placeholder="URL à réduire" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Ceci est l&apos;url que vous souhaitez réduire.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+    <Card className="w-[480px]">
+      <CardHeader>
+        <CardTitle>Raccourcir l&apos;URL</CardTitle>
+        <CardDescription>
+          Coller l&apos;URL à raccourcir ci-dessous.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
+            <FormField
+              control={form.control}
+              name="url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>URL</FormLabel>
+                  <FormControl>
+                    <Input placeholder="URL à réduire" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <Button type="submit">Envoyer</Button>
+          </form>
+        </Form>
+      </CardContent>
+      {data ? (
+        <CardFooter className="flex flex-col gap-4 w-full items-start">
+          <Label>URL réduite</Label>
+          <Input
+            id="url"
+            type="url"
+            placeholder="URL réduite"
+            readOnly
+            value={shortUrl}
           />
-          <Button type="submit">Envoyer</Button>
-          {data ? (
-            <>
-              <FormItem>
-                <FormLabel>URL réduite</FormLabel>
-                <Input
-                  id="url"
-                  type="url"
-                  placeholder="URL réduite"
-                  readOnly
-                  value={shortUrl}
-                />
-              </FormItem>
-              <Button type="button" onClick={handleCopy}>
-                Copier
-              </Button>
-            </>
-          ) : (
-            ""
-          )}
-        </form>
-      </Form>
-    </>
+
+          <Button type="button" onClick={handleCopy} className="w-full">
+            Copier
+          </Button>
+        </CardFooter>
+      ) : (
+        ""
+      )}
+    </Card>
   );
 }
