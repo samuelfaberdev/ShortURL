@@ -1,1 +1,3 @@
-export function ShortURLForm() {}
+export function ShortURLForm() {
+  return <></>;
+}
