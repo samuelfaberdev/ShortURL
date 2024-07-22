@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { createAlias } from "@/graphql/createAlias";
 import { useMutation } from "@apollo/client";
 import { useEffect, useState } from "react";
+import { FRONT_URL } from "../config";
 import {
   Card,
   CardContent,
@@ -45,9 +46,7 @@ export function ShortURLForm() {
   });
 
   useEffect(() => {
-    data
-      ? setShortUrl(`http://localhost:3000/${data.createRandomAliasUrl.alias}`)
-      : "";
+    data ? setShortUrl(`${FRONT_URL}/${data.createRandomAliasUrl.alias}`) : "";
   }, [data]);
 
   // 2. Define a submit handler.
