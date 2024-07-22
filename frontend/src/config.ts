@@ -1,1 +1,4 @@
-export const API_URL = "http://localhost:5050";
+export const API_URL =
+  typeof window !== "undefined" && location.origin.includes("localhost:3000")
+    ? "http://localhost:5050/api"
+    : "/api";
