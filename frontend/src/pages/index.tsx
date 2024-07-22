@@ -12,7 +12,7 @@ export default function Home() {
         <title>ShortURL</title>
       </Head>
       <main
-        className={`flex min-h-screen flex-col items-center gap-4 p-24 ${inter.className}`}
+        className={`flex min-h-screen flex-col items-center gap-4 p-6 sm:p-12 lg:p-24 ${inter.className}`}
       >
         <img src="/logo.png" className="h-14" height={56} />
         <ShortURLForm />
