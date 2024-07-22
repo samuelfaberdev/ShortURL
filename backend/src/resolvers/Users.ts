@@ -11,13 +11,19 @@ import {
   Resolver,
 } from "type-graphql";
 import { ContextType } from "../auth";
-import { ChangePasswordInput, User, UserCreateInput } from "../entities/User";
+import {
+  ChangePasswordInput,
+  ChangeUserRoleInput,
+  User,
+  UserCreateInput,
+} from "../entities/User";
 
 const argon2 = require("argon2");
 
 @Resolver(User)
 export class UserResolver {
   // Query pour récupérer tous les utilisateurs
+  @Authorized("admin")
   @Query(() => [User])
   async getUsers(): Promise<User[]> {
     const users = await User.find();
@@ -25,12 +31,10 @@ export class UserResolver {
   }
 
   // Query pour récupérer un utilisateur
+  @Authorized("admin")
   @Query(() => User, { nullable: true })
-  async user(@Arg("id", () => ID) id: number): Promise<User | null> {
-    const user = await User.findOne({
-      where: { id: id },
-      select: ["id", "email"],
-    });
+  async getUserById(@Arg("id", () => ID) id: number): Promise<User | null> {
+    const user = await User.findOneBy({ id: id });
     return user;
   }
 
@@ -111,6 +115,28 @@ export class UserResolver {
     return true;
   }
 
+  // Mutation de changement de role d'un utilisateur
+  @Authorized("admin")
+  @Mutation(() => Boolean)
+  async changeUserRole(
+    @Arg("data") data: ChangeUserRoleInput
+  ): Promise<boolean> {
+    const { newRoles, userId } = data;
+
+    const user = await User.findOneBy({ id: userId });
+
+    if (!user) {
+      throw new Error("Utilisateur non trouvé");
+    }
+
+    // Mise à jour du role dans la base de données
+    user.roles = newRoles;
+    await user.save();
+
+    return true;
+  }
+
+  // Mutation de connexion
   @Mutation(() => User, { nullable: true })
   async signIn(
     @Ctx() context: { req: any; res: any },
@@ -119,14 +145,14 @@ export class UserResolver {
   ): Promise<User | null> {
     const existingUser = await User.findOneBy({ email });
 
-    // verify if user exists
+    // Vérifier si l'utilisateur existe
     if (existingUser) {
       const isPasswordValid = await argon2.verify(
         existingUser.hashedPassword,
         password
       );
 
-      // verify if password is valid
+      // Vérifier si le mot de passe est valide
       if (isPasswordValid) {
         const token = jwt.sign(
           {
@@ -134,8 +160,6 @@ export class UserResolver {
           },
           `${process.env.JWT_SECRET}`
         );
-
-        console.log(token);
 
         const cookies = new Cookies(context.req, context.res);
         cookies.set("token", token, {
@@ -156,7 +180,7 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  async signout(@Ctx() context: ContextType): Promise<Boolean> {
+  async signOut(@Ctx() context: ContextType): Promise<Boolean> {
     const cookies = new Cookies(context.req, context.res);
     cookies.set("token", "", {
       httpOnly: true,

@@ -7,9 +7,10 @@ import {
 } from "@apollo/client";
 import type { AppProps } from "next/app";
 import dynamic from "next/dynamic";
+import { API_URL } from "../config";
 
 const link = createHttpLink({
-  uri: process.env.API_URL,
+  uri: API_URL,
   credentials: "include",
 });
 

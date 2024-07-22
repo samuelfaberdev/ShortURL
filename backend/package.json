@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "docker stop pgtesting ; docker run --rm --name pgtesting -p 5571:5432 -e POSTGRES_PASSWORD=pgpassword -d postgres && npx jest",
+    "wintest": "docker stop pgtesting && docker run --rm --name pgtesting -p 5571:5432 -e POSTGRES_PASSWORD=pgpassword -d postgres && npx jest",
     "start": "tsnd --poll --respawn --transpile-only ./src/index.ts"
   },
   "keywords": [],
@@ -16,6 +17,7 @@
     "class-validator": "^0.14.0",
     "cookies": "^0.9.1",
     "cors": "^2.8.5",
+    "date-fns": "^3.6.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "graphql": "^16.8.1",

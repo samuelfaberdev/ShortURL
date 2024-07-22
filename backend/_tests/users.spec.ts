@@ -1,13 +1,45 @@
-import { beforeAll, describe, expect, it } from "@jest/globals";
+import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import { GraphQLSchema, graphql } from "graphql";
-import { buildSchema } from "type-graphql";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { AuthChecker, buildSchema } from "type-graphql";
 import { DataSource } from "typeorm";
 import { dataSourceOptions } from "../src/datasource";
-import { Difficulty, QuestCreateInput } from "../src/entities/Quest";
-import { QuestResolver } from "../src/resolvers/Quests";
+import { User, UserCreateInput } from "../src/entities/User";
+import { UserResolver } from "../src/resolvers/Users";
+
+// Signer un jeton JWT avec l'ID de l'utilisateur
+function generateAuthToken(userId: string): string {
+  return jwt.sign({ userId }, "secret");
+}
+
+// Fonction pour vérifier si l'utilisateur est authentifié
+const customAuthChecker: AuthChecker<{
+  user: any;
+  authToken: string;
+}> = ({ context }) => {
+  const { authToken } = context;
+
+  if (!authToken) {
+    return false;
+  }
+
+  try {
+    const decodedToken = jwt.verify(authToken, "secret") as JwtPayload;
+    context.user = {
+      id: parseInt(decodedToken.userId, 10),
+      email: "testuser@example.com",
+      roles: "user",
+    } as any;
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
 
 let dataSource: DataSource;
 let schema: GraphQLSchema;
+let authToken: string;
+let fakeUser: User;
 
 beforeAll(async () => {
   dataSource = new DataSource({
@@ -18,76 +50,81 @@ beforeAll(async () => {
     password: "pgpassword",
     database: "postgres",
     dropSchema: true,
+    synchronize: true,
     logging: false,
   });
 
   await dataSource.initialize();
 
   schema = await buildSchema({
-    resolvers: [QuestResolver],
+    resolvers: [UserResolver],
+    authChecker: customAuthChecker,
   });
+
+  // Créer un utilisateur fictif dans la base de données
+  fakeUser = await User.create({
+    email: "testuser@example.com",
+    hashedPassword: "hashedPassword",
+    createdAt: new Date(),
+    roles: "user",
+  }).save();
+
+  authToken = generateAuthToken(fakeUser.id.toString());
 });
 
-describe("create a new quest", () => {
-  let createdQuestId: number;
+describe("create a new user", () => {
+  let createdUserId: number;
 
-  it("should create a new quest", async () => {
-    const data: QuestCreateInput = {
-      title: "Test Quest",
-      description: "Description d'une quête test",
-      startDate: new Date(),
-      duration: 10,
-      difficulty: Difficulty.EASY,
-      missions: [],
+  it("should create a new user", async () => {
+    const data: UserCreateInput = {
+      email: "user@user.com",
+      password: "12345678",
     };
 
     const response = await graphql({
       schema,
       source: `
-          mutation CreateQuest($data: QuestCreateInput!) {
-            createQuest(data: $data) {
+          mutation SignUp($data: UserCreateInput!) {
+            signUp(data: $data) {
               id
-              title
-              startDate
-              duration
-              difficulty
+              email
             }
           }
         `,
       variableValues: { data },
     });
 
-    const createQuest: any = response.data?.createQuest;
-    createdQuestId = createQuest.id;
+    const createUser: any = response.data?.signUp;
+    createdUserId = createUser.id;
 
-    expect(createQuest).toBeDefined();
-    expect(createQuest).toHaveProperty("id");
-    expect(createQuest).toHaveProperty("title", data.title);
-    expect(createQuest).toHaveProperty(
-      "startDate",
-      data.startDate.toISOString()
-    );
-    expect(createQuest).toHaveProperty("duration", data.duration);
-    expect(createQuest).toHaveProperty("difficulty", data.difficulty);
+    expect(createUser).toBeDefined();
+    expect(createUser).toHaveProperty("id");
+    expect(createUser).toHaveProperty("email", data.email);
   });
 
-  it("should find the created quest by its ID", async () => {
+  it("should find the created user with 'user' roles", async () => {
     const response = await graphql({
       schema,
       source: `
-        query getQuestById($Id: ID!) {
-          getQuestById(id: $Id) {
+          query MySelf {
+            mySelf {
               id
-              title
+              roles
             }
           }
         `,
-      variableValues: { Id: createdQuestId },
+      contextValue: {
+        authToken,
+        user: fakeUser,
+      },
     });
 
-    const foundQuest = response.data?.getQuestById;
+    const foundUser = response.data?.mySelf;
 
-    expect(foundQuest).toBeDefined();
-    expect(foundQuest).toHaveProperty("id", createdQuestId);
+    expect(foundUser).toBeDefined();
+    expect(foundUser).toHaveProperty("id", fakeUser.id.toString());
+    expect(foundUser).toHaveProperty("roles", "user");
   });
 });
+
+afterAll(() => dataSource.destroy());

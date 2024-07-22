@@ -5,8 +5,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { Url } from "./Url";
 
 @Entity()
 @ObjectType()
@@ -31,9 +33,13 @@ export class User extends BaseEntity {
   @Field()
   createdAt!: Date;
 
-  @Column("boolean", { default: false })
+  @Column({ default: "user" })
   @Field()
-  isAdmin!: boolean;
+  roles!: string;
+
+  @OneToMany(() => Url, (url) => url.createdBy)
+  @Field(() => [Url])
+  urls!: Url[];
 }
 
 @InputType()
@@ -56,4 +62,12 @@ export class ChangePasswordInput {
 
   @Field()
   newPassword: string;
+}
+
+@InputType()
+export class ChangeUserRoleInput {
+  @Field(() => ID)
+  userId!: number;
+  @Field()
+  newRoles!: string;
 }
