@@ -1,35 +1,44 @@
 services:
   backend:
-    build: ./backend
-    ports:
-      - 5050:5050
+    image: samuelfaberdev/shorturl-back
+    expose:
+      - 5050
+    environment:
+      - NODE_ENV=production
     env_file:
-      - ./backend/.env
+      - .env
+    depends_on:
+      database:
+        condition: service_healthy
+        restart: true
     volumes:
       - ./backend/src/:/app/src/
 
   database:
     image: postgres
     restart: always
-    # ports:
-    #   - 5433:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - /var/lib/postgresql/data
     env_file:
-      - ./.env
+      - .env
 
   frontend:
-    build: ./frontend
-    command: sh -c "npm run build"
-    volumes:
-      - web-client-build:/app/dist
+    image: samuelfaberdev/shorturl-front
 
   nginx:
     stop_grace_period: 0s
     image: nginx:1.21.3
     restart: always
+    depends_on:
+      - backend
+      - frontend
     ports:
-      - ${GATEWAY_PORT:-8000}:80
+      - ${GATEWAY_PORT:-8200}:80
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       # - ./logs:/var/log/nginx
