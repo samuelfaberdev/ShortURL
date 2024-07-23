@@ -1,6 +1,7 @@
 import { signup } from "@/graphql/signup";
 import { useMutation } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,6 +22,8 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Input } from "./ui/input";
+import { ToastClose } from "./ui/toast";
+import { useToast } from "./ui/use-toast";
 
 const formSchema = z
   .object({
@@ -39,6 +42,8 @@ const formSchema = z
 
 export function SignupForm() {
   const [doSignup, { data: signupData, error }] = useMutation(signup);
+  const { toast } = useToast();
+  const router = useRouter();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -52,14 +57,25 @@ export function SignupForm() {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
     try {
       await doSignup({
         variables: { data: { email: values.email, password: values.password } },
       });
-    } catch {
-      console.error(error);
+      toast({
+        title:
+          "Utilisateur créé avec succès, un email de confirmation vous a été envoyé.",
+        action: <ToastClose />,
+      });
+      setTimeout(() => {
+        router.replace("/signin");
+      }, 2000);
+    } catch (error: any) {
+      console.error(error.message);
+      toast({
+        variant: "destructive",
+        title: error.message,
+        action: <ToastClose />,
+      });
     }
   }
 
@@ -70,12 +86,10 @@ export function SignupForm() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>
-          Vous voulez plus ? Essayez les fonctionnalités Premium !
-        </CardTitle>
+        <CardTitle>Formulaire d&apos;inscription</CardTitle>
         <CardDescription>
-          Liens raccourcis personnalisés, dashboard avec satistiques
-          détaillées...
+          Débloquez les fonctionnalités Premium : Liens raccourcis
+          personnalisés, dashboard avec satistiques détaillées...
         </CardDescription>
       </CardHeader>
       <CardContent>
