@@ -56,3 +56,7 @@ jobs:
           push: true
           context: "{{defaultContext}}:backend"
           tags: ${{ secrets.DOCKERHUB_REPO_BACKEND }}:latest
+      - name: Invoke deployment hook
+        uses: distributhor/workflow-webhook@v3
+        with:
+          webhook_url: ${{ secrets.WEBHOOK_URL }}
