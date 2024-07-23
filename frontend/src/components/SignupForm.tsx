@@ -142,7 +142,7 @@ export function SignupForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit">S'inscrire</Button>
+            <Button type="submit">S&apos;inscrire</Button>
           </form>
         </Form>
       </CardContent>
