@@ -2,7 +2,6 @@ import { signup } from "@/graphql/signup";
 import { useMutation } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "./ui/button";
@@ -58,19 +57,21 @@ export function SignupForm() {
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await doSignup({
+      const { data } = await doSignup({
         variables: { data: { email: values.email, password: values.password } },
       });
-      toast({
-        title:
-          "Utilisateur créé avec succès, un email de confirmation vous a été envoyé.",
-        action: <ToastClose />,
-      });
-      setTimeout(() => {
-        router.replace("/signin");
-      }, 2000);
+      if (data.signUp) {
+        toast({
+          title:
+            "Utilisateur créé avec succès, un email de confirmation vous a été envoyé.",
+          description: "Redirection vers la page de connexion...",
+          action: <ToastClose />,
+        });
+        setTimeout(() => {
+          router.replace("/signin");
+        }, 2000);
+      }
     } catch (error: any) {
-      console.error(error.message);
       toast({
         variant: "destructive",
         title: error.message,
@@ -78,10 +79,6 @@ export function SignupForm() {
       });
     }
   }
-
-  useEffect(() => {
-    console.log(signupData);
-  }, [signupData]);
 
   return (
     <Card className="w-full">
