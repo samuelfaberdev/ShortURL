@@ -9,6 +9,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { createAlias } from "@/graphql/createAlias";
@@ -27,9 +28,7 @@ import { Label } from "./ui/label";
 import { useToast } from "./ui/use-toast";
 
 const formSchema = z.object({
-  url: z.string().min(5, {
-    message: "L'url doit faire au minimum 5 caractères.",
-  }),
+  url: z.string().url({ message: "URL invalide." }),
 });
 
 export function ShortURLForm() {
@@ -69,7 +68,7 @@ export function ShortURLForm() {
   }
 
   return (
-    <Card className="w-full max-w-[480px]">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Raccourcir l&apos;URL</CardTitle>
         <CardDescription>
@@ -91,6 +90,7 @@ export function ShortURLForm() {
                   <FormControl>
                     <Input placeholder="URL à réduire" {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
