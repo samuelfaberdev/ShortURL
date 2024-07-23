@@ -1,4 +1,4 @@
-import { signup } from "@/graphql/signup";
+import { signin } from "@/graphql/signin";
 import { useMutation } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
@@ -24,23 +24,15 @@ import { Input } from "./ui/input";
 import { ToastClose } from "./ui/toast";
 import { useToast } from "./ui/use-toast";
 
-const formSchema = z
-  .object({
-    email: z.string().email({ message: "Adresse email invalide." }),
-    password: z.string().min(8, {
-      message: "Le mot de passe doit faire au minimum 8 caractères.",
-    }),
-    confirmPassword: z.string().min(8, {
-      message: "Le mot de passe doit faire au minimum 8 caractères.",
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Les mots de passe ne sont pas identiques.",
-  });
+const formSchema = z.object({
+  email: z.string().email({ message: "Adresse email invalide." }),
+  password: z.string().min(8, {
+    message: "Le mot de passe doit faire au minimum 8 caractères.",
+  }),
+});
 
-export function SignupForm() {
-  const [doSignup, { data: signupData, error }] = useMutation(signup);
+export function SigninForm() {
+  const [doSignin, { data, error }] = useMutation(signin);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -50,26 +42,27 @@ export function SignupForm() {
     defaultValues: {
       email: "",
       password: "",
-      confirmPassword: "",
     },
   });
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const { data } = await doSignup({
-        variables: { data: { email: values.email, password: values.password } },
+      const { data } = await doSignin({
+        variables: { email: values.email, password: values.password },
       });
-      if (data.signUp) {
+      console.log(data.signIn);
+      if (data.signIn !== null) {
         toast({
           title:
-            "Utilisateur créé avec succès, un email de confirmation vous a été envoyé.",
-          description: "Redirection vers la page de connexion...",
+            "Connexion réalisée avec succès. Redirection vers votre Dashboard.",
           action: <ToastClose />,
         });
-        setTimeout(() => {
-          router.replace("/signin");
-        }, 2000);
+        // setTimeout(() => {
+        //   router.replace("/dashboard");
+        // }, 2000);
+      } else {
+        throw new Error("Mauvais identifiants !");
       }
     } catch (error: any) {
       toast({
@@ -83,10 +76,9 @@ export function SignupForm() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Formulaire d&apos;inscription</CardTitle>
+        <CardTitle>Formulaire de connexion</CardTitle>
         <CardDescription>
-          Débloquez les fonctionnalités Premium : Liens raccourcis
-          personnalisés, dashboard avec satistiques détaillées...
+          Connectez-vous pour accéder aux fonctionnalités Premium.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -125,24 +117,7 @@ export function SignupForm() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirmer le mot de passe</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Confirmation du mot de passe"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit">S'inscrire</Button>
+            <Button type="submit">Se connecter</Button>
           </form>
         </Form>
       </CardContent>
