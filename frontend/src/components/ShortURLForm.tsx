@@ -50,12 +50,10 @@ export function ShortURLForm() {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
     try {
       await doCreateAlias({ variables: { data: { url: values.url } } });
     } catch {
-      console.error(error);
+      console.error(error?.message);
     }
   }
 
