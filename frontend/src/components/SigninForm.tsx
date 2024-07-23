@@ -61,6 +61,7 @@ export function SigninForm() {
         // setTimeout(() => {
         //   router.replace("/dashboard");
         // }, 2000);
+        //
       } else {
         throw new Error("Mauvais identifiants !");
       }
