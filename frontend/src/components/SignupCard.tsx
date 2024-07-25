@@ -20,12 +20,13 @@ export function SignupCard() {
           détaillées...
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Link href="/signup">
+      <CardContent className="flex flex-col items-center gap-4 w-full">
+        <Link href="/signup" className="w-full">
           <Button type="button" className="w-full">
             Créer un compte
           </Button>
         </Link>
+        <Link href="/signin">Vous avez déjà un compte ? Se connecter.</Link>
       </CardContent>
     </Card>
   );

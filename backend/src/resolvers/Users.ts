@@ -70,7 +70,13 @@ export class UserResolver {
   @Authorized()
   @Query(() => User, { nullable: true })
   async mySelf(@Ctx() context: ContextType): Promise<User | null> {
-    return context.user as User;
+    const user = await User.findOne({
+      where: {
+        id: context.user?.id,
+      },
+      relations: { urls: true },
+    });
+    return user as User;
   }
 
   // Mutation de MàJ du mot passe utilisateur

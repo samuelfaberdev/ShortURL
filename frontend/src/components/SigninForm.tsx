@@ -58,9 +58,9 @@ export function SigninForm() {
           description: "Redirection vers votre Dashboard.",
           action: <ToastClose />,
         });
-        // setTimeout(() => {
-        //   router.replace("/dashboard");
-        // }, 2000);
+        setTimeout(() => {
+          router.replace("/dashboard");
+        }, 2000);
       } else {
         throw new Error("Mauvais identifiants !");
       }
