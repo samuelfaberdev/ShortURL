@@ -54,14 +54,13 @@ export function SigninForm() {
       console.log(data.signIn);
       if (data.signIn !== null) {
         toast({
-          title:
-            "Connexion réalisée avec succès. Redirection vers votre Dashboard.",
+          title: "Connexion réalisée avec succès.",
+          description: "Redirection vers votre Dashboard.",
           action: <ToastClose />,
         });
-        // setTimeout(() => {
-        //   router.replace("/dashboard");
-        // }, 2000);
-        // Test
+        setTimeout(() => {
+          router.replace("/dashboard");
+        }, 2000);
       } else {
         throw new Error("Mauvais identifiants !");
       }

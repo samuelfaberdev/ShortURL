@@ -1,15 +1,21 @@
-import { addDays } from "date-fns";
-import { Arg, ID, Mutation, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  Authorized,
+  Ctx,
+  ID,
+  Mutation,
+  Query,
+  Resolver,
+} from "type-graphql";
+import { ContextType, getUserFromReq } from "../auth";
 import { Url, UrlCreateInput } from "../entities/Url";
-
-const argon2 = require("argon2");
 
 @Resolver(Url)
 export class UrlResolver {
   // Query pour récupérer toutes les urls
   @Query(() => [Url])
   async getUrls(): Promise<Url[]> {
-    const urls = await Url.find();
+    const urls = await Url.find({ relations: { createdBy: true } });
     return urls;
   }
 
@@ -19,16 +25,21 @@ export class UrlResolver {
     @Arg("alias", () => ID) alias: string
   ): Promise<Url | null> {
     const url = await Url.findOne({
-      where: { alias: alias },
-      select: ["alias", "url"],
+      where: { alias },
     });
+
+    if (url) {
+      url.clics += 1;
+      url.save();
+    }
     return url;
   }
 
   // Mutation création d'une url raccourcie
   @Mutation(() => Url)
   async createRandomAliasUrl(
-    @Arg("data", () => UrlCreateInput) data: UrlCreateInput
+    @Arg("data", () => UrlCreateInput) data: UrlCreateInput,
+    @Ctx() context: ContextType
   ): Promise<Url> {
     // Génération d'un alias aléatoire de 6 caractères alphanumériques
     async function generateAlias(): Promise<string> {
@@ -65,9 +76,25 @@ export class UrlResolver {
     shortUrl.alias = await newAlias;
     shortUrl.url = data.url;
     shortUrl.createdAt = new Date();
-    shortUrl.expireAt = addDays(new Date(), 15);
+
+    let connectedUser = await getUserFromReq(context.req, context.res);
+
+    if (connectedUser) {
+      shortUrl.createdBy = connectedUser;
+    }
 
     await shortUrl.save();
     return shortUrl;
+  }
+
+  @Authorized()
+  @Mutation(() => Url, { nullable: true })
+  async deleteUrl(@Arg("alias", () => ID) alias: string): Promise<Url | null> {
+    const url = await Url.findOne({ where: { alias } });
+    if (url) {
+      await url.remove();
+      url.alias = alias;
+    }
+    return url;
   }
 }

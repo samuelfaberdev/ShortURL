@@ -13,6 +13,7 @@
     "@apollo/client": "^3.10.4",
     "@hookform/resolvers": "^3.4.0",
     "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-toast": "^1.2.1",
     "@types/node": "20.12.12",

@@ -24,7 +24,9 @@ export default function Layout({
         className={`flex min-h-screen flex-col items-center gap-4 p-6 sm:p-12 lg:p-24 ${inter.className}`}
       >
         <img src="/logo.png" className="h-14" height={56} />
-        <section className="w-full max-w-[800px]">{children}</section>
+        <section className="flex flex-col gap-4 w-full max-w-[800px]">
+          {children}
+        </section>
       </main>
       <Toaster />
     </>

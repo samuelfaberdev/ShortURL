@@ -8,6 +8,7 @@ import {
   ManyToOne,
   PrimaryColumn,
 } from "typeorm";
+import { ObjectID } from "./ObjectId";
 import { User } from "./User";
 
 @Entity()
@@ -25,9 +26,9 @@ export class Url extends BaseEntity {
   @Field()
   createdAt!: Date;
 
-  @Column()
+  @Column({ default: 0 })
   @Field()
-  expireAt!: Date;
+  clics!: number;
 
   @ManyToOne(() => User, (user) => user.urls)
   @Field(() => User, { nullable: true })
@@ -39,4 +40,7 @@ export class UrlCreateInput {
   @Field()
   @IsUrl()
   url!: string;
+
+  @Field({ nullable: true })
+  createdBy!: ObjectID;
 }

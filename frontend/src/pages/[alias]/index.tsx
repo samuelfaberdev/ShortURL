@@ -14,16 +14,31 @@ export default function AliasRedirection() {
     },
   });
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error : {error.message}</p>;
+  if (loading) return <p>Chargement...</p>;
+  if (error) return <p>Erreur : {error?.message}</p>;
 
-  setTimeout(() => router.replace(data.getUrlByAlias.url), 5000);
+  if (data.getUrlByAlias === null) {
+    setTimeout(() => router.replace(location.origin), 2000);
+    return (
+      <main
+        className={`flex flex-col min-h-screen justify-center items-center p-24 ${inter.className}`}
+      >
+        <p>
+          Alias <span className="font-bold">{router.query.alias}</span>{" "}
+          inconnu...
+        </p>
+        <p>Redirection à l&apos;accueil...</p>
+      </main>
+    );
+  }
+
+  setTimeout(() => router.replace(data.getUrlByAlias.url), 2000);
 
   return (
     <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
+      className={`flex flex-col min-h-screen justify-center items-center p-24 ${inter.className}`}
     >
-      Going to : {data.getUrlByAlias.url}
+      <p>C&apos;est parti : {data.getUrlByAlias.url}</p>
     </main>
   );
 }
