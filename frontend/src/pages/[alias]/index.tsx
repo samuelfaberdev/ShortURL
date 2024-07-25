@@ -14,8 +14,8 @@ export default function AliasRedirection() {
     },
   });
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error : {error?.message}</p>;
+  if (loading) return <p>Chargement...</p>;
+  if (error) return <p>Erreur : {error?.message}</p>;
 
   if (data.getUrlByAlias === null) {
     setTimeout(() => router.replace(location.origin), 2000);
@@ -27,7 +27,7 @@ export default function AliasRedirection() {
           Alias <span className="font-bold">{router.query.alias}</span>{" "}
           inconnu...
         </p>
-        <p>Redirection à l'accueil...</p>
+        <p>Redirection à l&apos;accueil...</p>
       </main>
     );
   }
@@ -38,7 +38,7 @@ export default function AliasRedirection() {
     <main
       className={`flex flex-col min-h-screen justify-center items-center p-24 ${inter.className}`}
     >
-      <p>Going to : {data.getUrlByAlias.url}</p>
+      <p>C&apos;est parti : {data.getUrlByAlias.url}</p>
     </main>
   );
 }
